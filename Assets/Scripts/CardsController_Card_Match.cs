@@ -23,7 +23,9 @@ public class CardsController_Card_Match : MonoBehaviour
 
     void Start()
     {
-
+        PlayerData_Card_Match.Instance.ResetScore(); // reset score to zero
+        PlayerData_Card_Match.Instance.LoadHighScore(); // load high score from playerprefs
+        UIManager_Card_Match.Instance.UpdateScoreUI(PlayerData_Card_Match.Instance.score, PlayerData_Card_Match.Instance.highScore); 
         PrepareSprites();
         CreateCards();
     }
@@ -97,14 +99,13 @@ public class CardsController_Card_Match : MonoBehaviour
         if (a.IconSprite == b.IconSprite)
         {
             matchCount++;
-
-
-
+            PlayerData_Card_Match.Instance.AddScore(10);
+            UIManager_Card_Match.Instance.UpdateScoreUI(PlayerData_Card_Match.Instance.score, PlayerData_Card_Match.Instance.highScore);
             a.SetInteractable(false);
             b.SetInteractable(false);
             if (matchCount >= spritePairs.Count / 2)
             {
-                
+                UIManager_Card_Match.Instance.ShowWinPanel(true);
                 Timer_Card_Match.instance.StopTimer();
             }
            
@@ -115,7 +116,33 @@ public class CardsController_Card_Match : MonoBehaviour
             b.HideIcon();
         }
     }
+ public void GameOverEvent()
+    {
+        
+        UIManager_Card_Match.Instance.ShowGameOverPanel(true);
+        Timer_Card_Match.instance.StopTimer();
+    }
 
+  public void RestartGame() // restart game at current level.set slider and timer to zero
+    {
+        foreach (Transform child in cardParent)
+        {
+            Destroy(child.gameObject);
+        }
+        Timer_Card_Match.instance.StopTimer();
+        matchCount = 0;
+        firstSelected = null;
+        SecondSelected = null;
+        UIManager_Card_Match.Instance.ShowWinPanel(false);
+        UIManager_Card_Match.Instance.ShowGameOverPanel(false);
+
+        PlayerData_Card_Match.Instance.ResetScore();
+        UIManager_Card_Match.Instance.UpdateScoreUI(PlayerData_Card_Match.Instance.score, PlayerData_Card_Match.Instance.highScore);
+
+        PrepareSprites();
+        CreateCards();
+        Timer_Card_Match.instance.SetTimer();
+    }
 
  public void SetDifficulty(Difficulty difficulty) 
     {
