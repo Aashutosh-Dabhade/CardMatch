@@ -14,7 +14,7 @@ public class CardsController_Card_Match : MonoBehaviour
     private List<Sprite> spritePairs;
     Card_Match firstSelected;
     Card_Match SecondSelected;
-
+  int matchCount;
 
     void Start()
     {
@@ -66,15 +66,36 @@ public class CardsController_Card_Match : MonoBehaviour
                 return;
             }
             if (SecondSelected == null)
-            {
                 SecondSelected = card;
+            {   StartCoroutine(CheckMAtching(firstSelected, SecondSelected));
+
                 firstSelected = null;
                 SecondSelected = null;
             }
         }
     }
 
-  
+  IEnumerator CheckMAtching(Card_Match a, Card_Match b) //check if first and second selected card is matching
+    {
+        yield return new WaitForSeconds(0.3f);
+        if (a.IconSprite == b.IconSprite)
+        {
+            matchCount++;
+
+
+
+            a.SetInteractable(false);
+            b.SetInteractable(false);
+
+           
+        }
+        else
+        {
+            a.HideIcon();
+            b.HideIcon();
+        }
+    }
+
 
 
     

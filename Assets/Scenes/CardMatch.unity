@@ -229,7 +229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d70f212930d3944181f0ffe2992a484, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pairsToMatch: 6
+  pairsToMatch: 4
   cardPrefab: {fileID: 598490289446963420, guid: c88f47392b5f55742a1c42d70b114e1d, type: 3}
   cardParent: {fileID: 1308285598}
   sprites:
