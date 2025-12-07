@@ -5,7 +5,12 @@ using UnityEngine;
 public class CardsController_Card_Match : MonoBehaviour
 {
 
+    public enum Difficulty { Easy, Medium, Hard }
 
+    [SerializeField] private Difficulty gameDifficulty = Difficulty.Easy;
+    [SerializeField] private int easyPairs = 4;
+    [SerializeField] private int mediumPairs = 8;
+    [SerializeField] private int hardPairs = 12;
     public int pairsToMatch;
 
     [SerializeField] Card_Match cardPrefab;
@@ -37,7 +42,18 @@ public class CardsController_Card_Match : MonoBehaviour
     public void PrepareSprites()  //based on difficulty level load no of cards pair-from enum
     {
         spritePairs = new List<Sprite>();
-       
+         switch (gameDifficulty)
+        {
+            case Difficulty.Easy:
+                pairsToMatch = easyPairs;
+                break;
+            case Difficulty.Medium:
+                pairsToMatch = mediumPairs;
+                break;
+            case Difficulty.Hard:
+                pairsToMatch = hardPairs;
+                break;
+        }
 
         for (int i = 0; i < pairsToMatch; i++)
         {
@@ -86,7 +102,11 @@ public class CardsController_Card_Match : MonoBehaviour
 
             a.SetInteractable(false);
             b.SetInteractable(false);
-
+            if (matchCount >= spritePairs.Count / 2)
+            {
+                
+                Timer_Card_Match.instance.StopTimer();
+            }
            
         }
         else
@@ -97,7 +117,17 @@ public class CardsController_Card_Match : MonoBehaviour
     }
 
 
-
+ public void SetDifficulty(Difficulty difficulty) 
+    {
+       Timer_Card_Match.instance.SetTimer();
+        gameDifficulty = difficulty;
+    }
+    public void SetDifficulty(int difficulty) // for setting difficulty from button
+    {
+       Timer_Card_Match.instance.SetTimer();    
+        gameDifficulty = (Difficulty)difficulty;
+       
+    }
     
    
 }
