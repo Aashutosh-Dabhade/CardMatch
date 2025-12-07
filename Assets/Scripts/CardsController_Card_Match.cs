@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class CardsController_Card_Match : MonoBehaviour
 {
-
     public enum Difficulty { Easy, Medium, Hard }
 
     [SerializeField] private Difficulty gameDifficulty = Difficulty.Easy;
     [SerializeField] private int easyPairs = 4;
     [SerializeField] private int mediumPairs = 8;
     [SerializeField] private int hardPairs = 12;
-    public int pairsToMatch;
+    private int pairsToMatch;
 
     [SerializeField] Card_Match cardPrefab;
     [SerializeField] public Transform cardParent;
@@ -19,7 +18,7 @@ public class CardsController_Card_Match : MonoBehaviour
     private List<Sprite> spritePairs;
     Card_Match firstSelected;
     Card_Match SecondSelected;
-  int matchCount;
+    int matchCount;
 
     void Start()
     {
@@ -36,6 +35,7 @@ public class CardsController_Card_Match : MonoBehaviour
         {
             Card_Match newCard = Instantiate(cardPrefab, cardParent);
             newCard.SelectIconSprite(spritePairs[i]);
+            newCard.cardsController = this;
             newCard.gameObject.name = "Card_" + i;
             newCard.ShowIcon();
         }
@@ -44,7 +44,7 @@ public class CardsController_Card_Match : MonoBehaviour
     public void PrepareSprites()  //based on difficulty level load no of cards pair-from enum
     {
         spritePairs = new List<Sprite>();
-         switch (gameDifficulty)
+        switch (gameDifficulty)
         {
             case Difficulty.Easy:
                 pairsToMatch = easyPairs;
@@ -77,23 +77,23 @@ public class CardsController_Card_Match : MonoBehaviour
         if (card.isSelected)
         {
             card.ShowIcon();
-
+            AudioManager_Match_Card.Instance.PlayShowIcon();
             if (firstSelected == null)
             {
                 firstSelected = card;
                 return;
             }
             if (SecondSelected == null)
+            {
                 SecondSelected = card;
-            {   StartCoroutine(CheckMAtching(firstSelected, SecondSelected));
-
+                StartCoroutine(CheckMAtching(firstSelected, SecondSelected));
                 firstSelected = null;
                 SecondSelected = null;
             }
         }
     }
 
-  IEnumerator CheckMAtching(Card_Match a, Card_Match b) //check if first and second selected card is matching
+    IEnumerator CheckMAtching(Card_Match a, Card_Match b) //check if first and second selected card is matching
     {
         yield return new WaitForSeconds(0.3f);
         if (a.IconSprite == b.IconSprite)
@@ -101,14 +101,18 @@ public class CardsController_Card_Match : MonoBehaviour
             matchCount++;
             PlayerData_Card_Match.Instance.AddScore(10);
             UIManager_Card_Match.Instance.UpdateScoreUI(PlayerData_Card_Match.Instance.score, PlayerData_Card_Match.Instance.highScore);
+
+            AudioManager_Match_Card.Instance.PlayCardMatch();
             a.SetInteractable(false);
             b.SetInteractable(false);
+
             if (matchCount >= spritePairs.Count / 2)
             {
-                UIManager_Card_Match.Instance.ShowWinPanel(true);
                 Timer_Card_Match.instance.StopTimer();
+                AddTimeBonus();
+                AudioManager_Match_Card.Instance.PlayWin();
+                UIManager_Card_Match.Instance.ShowWinPanel(true);
             }
-           
         }
         else
         {
@@ -116,14 +120,15 @@ public class CardsController_Card_Match : MonoBehaviour
             b.HideIcon();
         }
     }
- public void GameOverEvent()
+
+    public void GameOverEvent()
     {
-        
+        AudioManager_Match_Card.Instance.PlayGameOver();
         UIManager_Card_Match.Instance.ShowGameOverPanel(true);
         Timer_Card_Match.instance.StopTimer();
     }
 
-  public void RestartGame() // restart game at current level.set slider and timer to zero
+    public void RestartGame() // restart game at current level.set slider and timer to zero
     {
         foreach (Transform child in cardParent)
         {
@@ -144,18 +149,28 @@ public class CardsController_Card_Match : MonoBehaviour
         Timer_Card_Match.instance.SetTimer();
     }
 
- public void SetDifficulty(Difficulty difficulty) 
+    public void SetDifficulty(Difficulty difficulty) 
     {
-       Timer_Card_Match.instance.SetTimer();
+        Timer_Card_Match.instance.SetTimer();
         gameDifficulty = difficulty;
     }
     public void SetDifficulty(int difficulty) // for setting difficulty from button
     {
-       Timer_Card_Match.instance.SetTimer();    
+        Timer_Card_Match.instance.SetTimer();
         gameDifficulty = (Difficulty)difficulty;
-       
+        RestartGame();
     }
-    
-   
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    private void AddTimeBonus()
+    {
+        float remainingTime = Mathf.Max(0, Timer_Card_Match.instance.playDuration - (Timer_Card_Match.instance.playDuration - float.Parse(Timer_Card_Match.instance.timerText.text)));
+        int timeBonus = Mathf.RoundToInt(remainingTime * 2);
+        PlayerData_Card_Match.Instance.AddScore(timeBonus);
+        UIManager_Card_Match.Instance.UpdateScoreUI(PlayerData_Card_Match.Instance.score, PlayerData_Card_Match.Instance.highScore);
+    }
 }
 

@@ -9,7 +9,7 @@ public class Card_Match : MonoBehaviour
     public Sprite hiddenIconSprite; //sprite to card icon. in this case shield icon
     public Sprite IconSprite;  //random sprite to be assigned here.
     public bool isSelected = false;
-     CardsController_Card_Match cardsController; //reference to the CardsController script
+    public CardsController_Card_Match cardsController; //reference to the CardsController script
     void Start()
     {
         cardsController = FindObjectOfType<CardsController_Card_Match>();
