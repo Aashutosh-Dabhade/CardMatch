@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class Card_Match : MonoBehaviour
 {
-     [SerializeField] private Image iconImage; //icon to show
+    [SerializeField] private Image iconImage; //icon to show
     public Sprite hiddenIconSprite; //sprite to card icon. in this case shield icon
     public Sprite IconSprite;  //random sprite to be assigned here.
     public bool isSelected = false;
     public CardsController_Card_Match cardsController; //reference to the CardsController script
-    void Start()
-    {
-        cardsController = FindObjectOfType<CardsController_Card_Match>();
-    }
-    public void OnCardClicked() 
+    [SerializeField] private float flipDuration = 0.3f;
+    private bool isFlipping = false;
+
+  
+    public void OnCardClicked()
     {
         if (isSelected)
         {
@@ -24,7 +24,6 @@ public class Card_Match : MonoBehaviour
         {
             ShowIcon();
             cardsController.SetSelected(this);
-          
         }
     }
 
@@ -32,25 +31,64 @@ public class Card_Match : MonoBehaviour
     {
         IconSprite = sp;
     }
-   
-   public void ShowIcon()
+
+    public void ShowIcon()
     {
-       
-        iconImage.sprite = IconSprite;
+
+        Debug.Log("Showing Icon");
         isSelected = true;
+        StartCoroutine(FlipCard(IconSprite, true));
     }
+
     public void HideIcon()
     {
-        iconImage.sprite = hiddenIconSprite;
-        isSelected = false;
+
+        StartCoroutine(HideIconDelayed());
+        StartCoroutine(FlipCard(hiddenIconSprite, false));
+
     }
-public void SetInteractable(bool interactable)
-{
-    GetComponent<Button>().interactable = interactable;
-}
-    // Update is called once per frame
-    void Update()
+
+    private IEnumerator HideIconDelayed()
     {
-        
+        while (isFlipping)
+            yield return null;
+
+        StartCoroutine(FlipCard(hiddenIconSprite, false));
+        isFlipping = false;
+        yield return null;
     }
+
+    private IEnumerator FlipCard(Sprite targetSprite, bool selected)
+    {
+        isFlipping = true;
+        float elapsed = 0f;
+
+        while (elapsed < flipDuration / 2)
+        {
+            elapsed += Time.deltaTime;
+            float scale = Mathf.Lerp(1f, 0f, elapsed / (flipDuration / 2));
+            transform.localScale = new Vector3(scale, 1f, 1f);
+            yield return null;
+        }
+
+        iconImage.sprite = targetSprite;
+        isSelected = selected;
+
+        elapsed = 0f;
+        while (elapsed < flipDuration / 2)
+        {
+            elapsed += Time.deltaTime;
+            float scale = Mathf.Lerp(0f, 1f, elapsed / (flipDuration / 2));
+            transform.localScale = new Vector3(scale, 1f, 1f);
+            yield return null;
+        }
+
+        transform.localScale = Vector3.one;
+        isFlipping = false;
+    }
+    public void SetInteractable(bool interactable)
+    {
+        GetComponent<Button>().interactable = interactable;
+    }
+   
 }
